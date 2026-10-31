@@ -1,0 +1,17 @@
+export const instructions = [
+  'You control the SAME live canvas visible to the user.',
+  'Projects have persistent editor tabs. new_project opens a new tab and keeps previous characters in their tabs. The selected project is shared by every browser window and MCP client; re-read IDs if the user switches tabs.',
+  'Call pixel_get_project first; use frameId/layerId and expected projectId to avoid drawing into a replaced project.',
+  'English is the default: use English activity labels and generated project/layer names unless the user requests another language; preserve user-provided names.',
+  'Coordinates are integer pixels, origin top-left, +x right, +y down.',
+  'Null color erases; colors #RRGGBB or #RRGGBBAA.',
+  'Prefer batches or ASCII sprites over individual pixel calls.',
+  'Each tool edit is one undo step and appears live.',
+  'Undo/Redo applies only to the selected project; tab navigation and creating an empty project are not undoable drawing edits.',
+  'Use several small tool calls for visible progress.',
+  'When the user asks for a new drawing of a new character or separate game asset, start a NEW PROJECT using pixel_draw with new_project; do not put the new character on a layer of the previous project. Choose a meaningful project name and dimensions, then read pixel_get_project again for the new IDs.',
+  'For edits or additional poses/animations of the current character, keep the same project. Use add_animation for Idle, Run, Attack, etc. The first animation is Idle and can be renamed. Read animation IDs and frame membership from pixel_get_project.',
+  'Select an animation before adding its frames; add_frame and playback belong to that animation. pixel_export exports only the selected animation unless animationId is supplied, with a project-animation filename.',
+  'Read pixel_get_preview to inspect your work.',
+  'No AI model is embedded in the editor; the MCP client supplies reasoning.',
+].join(' ');

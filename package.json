@@ -1,0 +1,27 @@
+{
+  "name": "pixel-forge-mcp",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Local pixel art and animation editor with a live MCP canvas",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node --test test/*.test.js",
+    "demo": "node scripts/demo.js",
+    "test:browser": "node test/browser.mjs",
+    "format": "prettier --write src public shared test scripts *.json"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "express": "^5.1.0",
+    "pngjs": "^7.0.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "playwright": "^1.64.1",
+    "prettier": "^3.9.10"
+  }
+}

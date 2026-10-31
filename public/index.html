@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pixel Forge · Sprite studio</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%23c1f18c' d='M4 4h20v4h4v16h-8v4H4z'/%3E%3Cpath fill='%23202424' d='M12 12h8v8h-8z'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/ui/project-tabs.css" />
+    <script type="module" src="/app.js"></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark"><i></i></span>
+        <div>pixel forge<span>SPRITE STUDIO</span></div>
+      </div>
+      <button id="projectTitle" class="document-name" title="Rename project">
+        Untitled sprite <span>⌄</span>
+      </button>
+      <div class="header-actions">
+        <span id="connection" class="connection"><i></i> Connecting…</span
+        ><button id="connect" class="button">⌘ <span>Connect AI</span></button
+        ><button id="unity" class="button" title="Project details and Unity / Unreal export folder">
+          ⓘ Project info</button
+        ><button id="export" class="button primary">↗ Export PNG</button>
+      </div>
+    </header>
+    <nav class="menubar" aria-label="Project">
+      <div class="file-actions">
+        <button id="new">New project</button><button id="projects">Projects</button
+        ><button id="open">Open</button><button id="save">Save project</button><span class="divider"></span
+        ><button id="undo" title="Undo (Ctrl+Z)">↶ Undo</button
+        ><button id="redo" title="Redo (Ctrl+Shift+Z)">↷ Redo</button>
+      </div>
+      <span id="saveStatus" class="muted">Local autosave</span>
+    </nav>
+    <nav class="project-tabs-bar" aria-label="Open projects">
+      <div id="projectTabs" class="project-tabs" role="tablist" aria-label="Project tabs"></div>
+      <button id="newProjectTab" class="new-project-tab" title="New project" aria-label="New project tab">
+        +
+      </button>
+    </nav>
+    <main id="projectEditor" class="studio">
+      <aside class="tools-panel">
+        <span class="section-eyebrow">TOOLS</span>
+        <div id="toolButtons" class="tool-buttons"></div>
+        <div class="tool-separator"></div>
+        <button id="primaryColor" class="current-color" title="Choose color"><span></span></button
+        ><input type="color" id="colorPicker" value="#98c987" aria-label="Choose color" />
+        <button
+          id="transparent"
+          class="transparent-swatch"
+          title="Transparent color (eraser)"
+          aria-label="Transparent color"
+        >
+          ╱
+        </button>
+        <span class="toolbar-foot">1 px</span>
+      </aside>
+      <section class="workspace">
+        <div class="optionsbar">
+          <div class="tool-info">
+            <span id="toolName">Pencil</span><span class="small-tag" id="toolKey">B</span>
+          </div>
+          <span class="divider"></span
+          ><label
+            >Size
+            <select id="brushSize" aria-label="Brush size">
+              <option value="1">1 px</option>
+              <option value="2">2 px</option>
+              <option value="3">3 px</option>
+              <option value="4">4 px</option>
+              <option value="8">8 px</option>
+            </select></label
+          ><label class="filled-option"><input id="filled" type="checkbox" checked /> Filled</label
+          ><span class="options-spacer"></span
+          ><button id="mirror" class="icon-text" title="Mirror pencil and eraser strokes">◧ Mirror</button
+          ><button id="grid" class="icon-text active" title="Grid (G)">▦ Grid</button>
+        </div>
+        <div class="canvas-header">
+          <div>
+            <span class="canvas-dot"></span><span id="canvasLabel">CANVAS</span
+            ><span id="canvasSize" class="muted">32 × 32</span>
+          </div>
+          <span class="muted">TRANSPARENT BACKGROUND</span>
+        </div>
+        <div id="stage" class="stage">
+          <div id="canvasStack" class="canvas-stack">
+            <canvas id="art" aria-label="Pixel art canvas"></canvas>
+            <div id="pixelGrid" class="pixel-grid"></div>
+            <canvas id="interaction" aria-label="Draw on canvas" tabindex="0"></canvas>
+          </div>
+          <div id="emptyHint" class="canvas-hint">Every pixel is a beginning.</div>
+        </div>
+        <div class="canvas-footer">
+          <span id="coordinates">X — &nbsp; Y —</span><span id="selectionInfo" class="muted">Artwork</span>
+          <div class="zoom-control">
+            <button id="zoomOut" title="Zoom out">−</button
+            ><button id="zoomFit" title="Fit canvas to workspace">Fit</button><span id="zoomLabel">100%</span
+            ><button id="zoomIn" title="Zoom in">+</button>
+          </div>
+        </div>
+        <section class="timeline">
+          <div class="timeline-heading">
+            <div>
+              <span class="section-eyebrow">ANIMATION</span
+              ><span id="frameCount" class="count-badge">1 FRAME</span>
+            </div>
+            <div class="timeline-controls">
+              <button id="onion" class="icon-text" title="Show the previous frame as a transparent guide">
+                ◉ Onion skin</button
+              ><label
+                ><input id="fps" type="number" min="1" max="60" value="8" aria-label="Frames per second" />
+                fps</label
+              ><button id="play" title="Play animation (Space)" class="play-button">▶</button
+              ><span class="divider"></span><button id="duplicateFrame" title="Duplicate frame">⧉</button
+              ><button id="deleteFrame" title="Delete frame">⌫</button
+              ><button id="addFrame" class="button small">+ Frame</button>
+            </div>
+          </div>
+          <div class="animation-groups">
+            <div id="animationTabs" class="animation-tabs" role="tablist" aria-label="Animation groups"></div>
+            <button id="addAnimation" class="button small" title="Create an animation group">
+              + Animation
+            </button>
+            <button id="renameAnimation" title="Rename selected animation" aria-label="Rename animation">
+              Rename
+            </button>
+            <button
+              id="deleteAnimation"
+              title="Delete selected animation and its frames"
+              aria-label="Delete animation"
+            >
+              ⌫
+            </button>
+          </div>
+          <div id="frames" class="frames"></div>
+        </section>
+      </section>
+      <aside class="properties">
+        <section class="preview-section">
+          <div class="section-heading">
+            <span class="section-eyebrow">PREVIEW</span><span id="previewScale" class="muted">1×</span>
+          </div>
+          <div class="preview-well"><canvas id="preview" width="128" height="128"></canvas></div>
+          <div class="preview-caption">
+            <span id="previewName">Untitled sprite</span><span class="muted">PNG · RGBA</span>
+          </div>
+        </section>
+        <section class="palette-section">
+          <div class="section-heading">
+            <span class="section-eyebrow">PALETTE</span
+            ><button id="addColor" title="Add current color to palette">+</button>
+          </div>
+          <div id="palette" class="palette"></div>
+          <div class="hex-input">
+            <span>#</span
+            ><input id="hex" value="98c987" maxlength="8" spellcheck="false" aria-label="Hex color" /><span
+              id="colorDot"
+            ></span>
+          </div>
+        </section>
+        <section class="layers-section">
+          <div class="section-heading">
+            <span class="section-eyebrow">LAYERS</span>
+            <div>
+              <button id="layerUp" title="Move layer up">↑</button
+              ><button id="layerDown" title="Move layer down">↓</button
+              ><button id="addLayer" title="Add layer">+</button>
+            </div>
+          </div>
+          <div id="layers" class="layers"></div>
+          <div class="layer-bottom">
+            <label>Opacity <input id="opacity" type="range" min="0" max="100" value="100" /></label
+            ><span id="opacityValue">100%</span
+            ><button id="deleteLayer" title="Delete selected layer">⌫</button>
+          </div>
+        </section>
+        <section class="ai-section">
+          <div class="section-heading">
+            <span class="section-eyebrow">AI WORKSPACE</span><span class="live-badge">MCP</span>
+          </div>
+          <div class="ai-description">
+            <span class="ai-orb">✳</span>
+            <div id="aiStatus">Ready to collaborate<span>Connect Codex or Claude Code.</span></div>
+          </div>
+          <div id="activity" class="activity"></div>
+          <button id="connectSecondary" class="connect-link">Connection guide ↗</button>
+        </section>
+        <div class="properties-footer">CRAFTED PIXEL BY PIXEL <span>✦</span></div>
+      </aside>
+    </main>
+    <footer class="statusbar">
+      <span><i></i> LOCAL WORKSPACE</span
+      ><span id="statusText">B Pencil &nbsp; E Eraser &nbsp; F Fill &nbsp; I Eyedropper &nbsp; G Grid</span
+      ><span>PIXEL FORGE <b>v1.0</b></span>
+    </footer>
+    <div id="toast" role="status" class="toast" hidden></div>
+    <input id="fileInput" type="file" accept=".json,.png,.pixel.json" hidden />
+    <dialog id="newDialog">
+      <form id="newForm">
+        <div class="dialog-top">
+          <span class="section-eyebrow">NEW PROJECT</span
+          ><button type="button" data-close aria-label="Close">×</button>
+        </div>
+        <h1>Start with a pixel.</h1>
+        <p>A canvas for your next character, item, or world.</p>
+        <label>Project name<input id="newName" value="Untitled sprite" maxlength="80" required /></label>
+        <div class="dimension-inputs">
+          <label>Width<input id="newWidth" type="number" value="32" min="1" max="256" required /></label
+          ><span>×</span
+          ><label>Height<input id="newHeight" type="number" value="32" min="1" max="256" required /></label>
+        </div>
+        <div class="presets">
+          <button type="button" data-size="16">16 × 16</button
+          ><button type="button" data-size="32">32 × 32</button
+          ><button type="button" data-size="64">64 × 64</button
+          ><button type="button" data-size="128">128 × 128</button>
+        </div>
+        <p class="muted">Replacing the canvas can be undone with Undo.</p>
+        <button class="button primary full" type="submit">Create canvas ↗</button>
+      </form>
+    </dialog>
+    <dialog id="connectDialog">
+      <div class="dialog-top">
+        <span class="section-eyebrow">MCP CONNECTION</span><button data-close aria-label="Close">×</button>
+      </div>
+      <span class="dialog-symbol">✳</span>
+      <h1>You imagine.<br />AI draws. Live.</h1>
+      <p>You and the AI share the same canvas. Every MCP edit appears here instantly and can be undone.</p>
+      <div class="endpoint"><span>STREAMABLE HTTP · LOCAL</span><code id="endpoint"></code></div>
+      <label>Codex <button class="copy-command" data-copy="codex">Copy</button></label>
+      <pre id="codexCommand"></pre>
+      <label>Claude Code <button class="copy-command" data-copy="claude">Copy</button></label>
+      <pre id="claudeCommand"></pre>
+      <p>
+        After adding the server, restart your MCP client or refresh its connection. Keep this editor running.
+      </p>
+      <div class="prompt-example">
+        “Draw a pixel art dog on the existing canvas. Use pixel-forge MCP and draw in several steps so I can
+        watch.”
+      </div>
+      <p class="muted">The model runs in Codex or Claude Code. The editor does not require an API key.</p>
+    </dialog>
+    <dialog id="unityDialog">
+      <form id="unityForm">
+        <div class="dialog-top">
+          <span class="section-eyebrow">PROJECT INFO</span
+          ><button type="button" data-close aria-label="Close">×</button>
+        </div>
+        <h1>A home for your pixels.</h1>
+        <p id="infoDimensions" class="project-details"></p>
+        <label>Project name<input id="infoProjectName" type="text" maxlength="80" required /></label>
+        <label
+          >Game engine<select id="infoEngine">
+            <option value="unity">Unity</option>
+            <option value="unreal">Unreal Engine</option>
+          </select></label
+        >
+        <label class="check-label"
+          ><input id="unityEnabled" type="checkbox" /> Automatically export PNG to this folder</label
+        >
+        <label for="unityFolder">Export folder</label>
+        <div class="folder-input">
+          <input
+            id="unityFolder"
+            type="text"
+            placeholder="C:\Your Unity Project\Assets\Sprites"
+            spellcheck="false"
+            maxlength="2048"
+          /><button id="infoBrowse" type="button" class="button">Browse…</button>
+        </div>
+        <p id="infoFolderHint" class="muted">Choose a folder inside your Unity project's Assets directory.</p>
+        <label class="check-label"
+          ><input id="infoMainFolder" type="checkbox" />Use this as the main export folder for all
+          projects</label
+        >
+        <p id="infoMainFolderHint" class="muted">
+          The main folder is remembered after restarting. Each project keeps its own PNG filename and
+          automatic export setting. Uncheck to use a separate folder for this project.
+        </p>
+        <label
+          >Filename prefix (animation name is added)<input
+            id="unityFileName"
+            type="text"
+            value="sprite"
+            pattern="[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}"
+            maxlength="64"
+            required
+            spellcheck="false"
+        /></label>
+        <p id="infoExportName" class="muted"></p>
+        <div id="infoUnityOptions">
+          <label
+            >Pixels per Unity unit<input id="unityPPU" type="number" value="32" min="1" max="1000" required
+          /></label>
+          <label class="check-label"
+            ><input id="unityImporter" type="checkbox" checked /> Install the Unity pixel art importer</label
+          >
+          <p class="muted">
+            The importer sets Sprite (2D and UI), Point filtering, no compression, and no mipmaps for Pixel
+            Forge exports. Focus Unity once after installation to compile it.
+          </p>
+        </div>
+        <p id="infoUnrealHint" class="muted" hidden>
+          Unreal receives PNG source files. Import the PNG once, then enable Editor Preferences → Loading
+          &amp; Saving → Auto Reimport for this folder. For sprites, use Paper 2D. Pixel Forge does not create
+          .uasset files.
+        </p>
+        <div id="unityStatus" class="sync-status" role="status">Automatic export is off.</div>
+        <p class="muted">
+          Edits update the selected animation's PNG. Switching groups changes the filename suffix. Use Export
+          PNG for animation sprite sheets. Create a new project for a different character.
+        </p>
+        <p class="muted">
+          The destination is remembered for this project on this computer. New projects start with automatic
+          export off.
+        </p>
+        <button type="submit" class="button primary full">Save project info</button>
+      </form>
+    </dialog>
+    <dialog id="projectsDialog">
+      <div class="dialog-top">
+        <span class="section-eyebrow">SAVED PROJECTS</span
+        ><button type="button" data-close aria-label="Close">×</button>
+      </div>
+      <h1>Your characters.</h1>
+      <p>Projects are saved on this computer. Starting a new character keeps the previous project here.</p>
+      <div id="projectList" class="project-list"></div>
+    </dialog>
+    <dialog id="exportDialog">
+      <form id="exportForm">
+        <div class="dialog-top">
+          <span class="section-eyebrow">EXPORT</span
+          ><button type="button" data-close aria-label="Close">×</button>
+        </div>
+        <h1>Ready for your game.</h1>
+        <p>Crisp pixels and true alpha transparency.</p>
+        <label>Animation<select id="exportAnimation"></select></label>
+        <p id="exportFileName" class="muted"></p>
+        <label
+          >Format<select id="exportKind">
+            <option value="frame">PNG · selected frame</option>
+            <option value="sheet">PNG · animation sprite sheet</option>
+            <option value="metadata">JSON · sprite sheet metadata</option>
+          </select></label
+        ><label
+          >Size<select id="exportScale">
+            <option value="1">1× · original pixels</option>
+            <option value="2">2×</option>
+            <option value="4">4×</option>
+            <option value="8">8×</option>
+            <option value="16">16×</option>
+          </select></label
+        >
+        <p class="muted">
+          For Godot, Unity, and other engines, use 1× and nearest-neighbor filtering. Download the sprite
+          sheet and JSON separately.
+        </p>
+        <button type="submit" class="button primary full">Download file ↓</button>
+      </form>
+    </dialog>
+  </body>
+</html>
