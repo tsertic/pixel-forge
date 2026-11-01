@@ -1,4 +1,6 @@
 export const instructions = [
+  'ONE CHARACTER PER PROJECT. For a NEW character, call pixel_create_character with an appropriate name BEFORE drawing. Example: Skeleton is open and the user asks for a wizard -> create Wizard in a new project tab. Never add Wizard as a layer or Wizard Idle animation to Skeleton.',
+  'pixel_draw and pixel_paint_sprite require projectId, intent (new_character or edit_character), and characterName. Name the actual character requested by the user. For edits, characterName must match the selected project name. Missing declarations or mismatched character names are rejected by the server. Do not mislabel a new-character request as an edit.',
   'You control the SAME live canvas visible to the user.',
   'Projects have persistent editor tabs. new_project opens a new tab and keeps previous characters in their tabs. The selected project is shared by every browser window and MCP client; re-read IDs if the user switches tabs.',
   'Call pixel_get_project first; use frameId/layerId and expected projectId to avoid drawing into a replaced project.',
@@ -9,7 +11,7 @@ export const instructions = [
   'Each tool edit is one undo step and appears live.',
   'Undo/Redo applies only to the selected project; tab navigation and creating an empty project are not undoable drawing edits.',
   'Use several small tool calls for visible progress.',
-  'When the user asks for a new drawing of a new character or separate game asset, start a NEW PROJECT using pixel_draw with new_project; do not put the new character on a layer of the previous project. Choose a meaningful project name and dimensions, then read pixel_get_project again for the new IDs.',
+  'After pixel_create_character, use its new IDs and name with intent=edit_character for drawing that character. Read pixel_get_project again as needed. The advanced alternative is a pixel_draw batch with intent=new_character and matching characterName, beginning with exactly one new_project operation.',
   'For edits or additional poses/animations of the current character, keep the same project. Use add_animation for Idle, Run, Attack, etc. The first animation is Idle and can be renamed. Read animation IDs and frame membership from pixel_get_project.',
   'Select an animation before adding its frames; add_frame and playback belong to that animation. pixel_export exports only the selected animation unless animationId is supplied, with a project-animation filename.',
   'Read pixel_get_preview to inspect your work.',

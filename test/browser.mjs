@@ -1,3 +1,4 @@
+import { callWithCharacter } from './helpers/mcp-client.js';
 import assert from 'node:assert/strict';
 import { mkdtempSync, readFileSync, rmSync, mkdirSync, writeFileSync, existsSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -147,7 +148,7 @@ try {
 
   await client.connect(new StreamableHTTPClientTransport(new URL(origin + '/mcp')));
   const p = instance.store.project;
-  const result = await client.callTool({
+  const result = await callWithCharacter(client, instance.store, {
     name: 'pixel_draw',
     arguments: {
       projectId: p.id,
@@ -186,7 +187,7 @@ try {
   await page.locator('#unityDialog').waitFor({ state: 'hidden' });
   assert.ok(existsSync(path.join(spriteFolder, 'dog-idle.png')));
   assert.ok(existsSync(path.join(spriteFolder, 'Editor', 'PixelForgeSpriteImporter.cs')));
-  const liveEdit = await client.callTool({
+  const liveEdit = await callWithCharacter(client, instance.store, {
     name: 'pixel_draw',
     arguments: { operations: [{ type: 'pixels', pixels: [{ x: 11, y: 10, color: '#ee3399' }] }] },
   });
@@ -287,7 +288,7 @@ try {
   console.log('PASS: saved Projects panel reopens characters with their animation groups');
   console.log('PASS: transparent PNG download/import and full project round trip');
   console.log('PASS: main folder checkbox, inheritance across projects, and per-project override');
-  const companion = await client.callTool({
+  const companion = await callWithCharacter(client, instance.store, {
     name: 'pixel_draw',
     arguments: {
       projectId: saved.id,

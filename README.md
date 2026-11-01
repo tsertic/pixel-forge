@@ -42,7 +42,7 @@ Close and reopen Codex after registering the server, then open a **new chat**. L
 
 Copy this into the new Codex chat:
 
-> Use the pixel-forge MCP server. First call pixel_get_project and inspect the canvas with pixel_get_preview. Start a new project named "Cat companion" for a new character, using a 32 by 32 pixel canvas. Read the new project IDs, then draw a cute pixel art cat in its default Idle animation with a transparent background. Keep the previous character saved in Projects. Draw in several separate MCP calls so I can watch the progress live in the editor. Use English activity labels. When finished, inspect the result with pixel_get_preview. If the MCP tools are unavailable, tell me before proceeding.
+> Use the pixel-forge MCP server. First call pixel_get_project and inspect the canvas with pixel_get_preview. First call pixel_create_character with name "Cat companion", width 32, and height 32 for this new character. Use intent edit_character and characterName "Cat companion" for subsequent drawing calls. Read the new project IDs, then draw a cute pixel art cat in its default Idle animation with a transparent background. Keep the previous character saved in Projects. Draw in several separate MCP calls so I can watch the progress live in the editor. Use English activity labels. When finished, inspect the result with pixel_get_preview. If the MCP tools are unavailable, tell me before proceeding.
 
 You can replace "cat" and "Cat" with "dog" and "Dog", or describe another character, item, or prop. You can write your own requests in your preferred language; English remains the editor's default language.
 
@@ -85,6 +85,14 @@ Click **Play** (the triangle button) to preview the selected animation group. Fo
 | You accidentally changed the wrong thing                    | Click Undo. For a previous session, reopen a project copy you downloaded with Save project.                                                                                                     |
 
 The editor does not need an OpenAI API key. You use the model through your existing Codex or Claude Code client.
+
+## One character per project
+
+A wizard and a skeleton are different projects. Idle, Run, and Attack of the same character are animation groups within that character's project. For example, keep Skeleton's Idle/Run in **Skeleton**, then create **Wizard** with its own Idle group and tab.
+
+MCP now provides **pixel_create_character** for this first step. Drawing tools require an explicit `intent` and `characterName` as well as `projectId`; a mismatched character name or an undeclared edit is rejected. These checks validate the identity declared by the agent, so the agent must describe the actual character requested by the user. The editor does not infer character identity from pixels.
+
+After upgrading, refresh the MCP tool list or restart Codex/Claude Code so the new tool and required inputs are available. A useful prompt is: **"Create a new Wizard character using pixel_create_character, give the project a suitable name, then draw inside that new project. Keep Skeleton unchanged."**
 
 ## Project tabs
 
@@ -209,7 +217,21 @@ The interface runs locally in your browser. This version does not include a stan
 
 Keep the editor running. Its MCP endpoint is **http://127.0.0.1:3210/mcp**, using **Streamable HTTP**. The **Connect AI** button in the editor also shows these commands with copy buttons.
 
-Codex:
+For MCP clients that use an `mcpServers` JSON configuration, **Connect AI** also provides **Copy JSON** and **Download JSON**:
+
+```json
+{
+  "mcpServers": {
+    "pixel-forge": {
+      "url": "http://127.0.0.1:3210/mcp"
+    }
+  }
+}
+```
+
+Merge this entry into your client's existing configuration. The editor uses its current address in the copied/downloaded JSON, including a custom port when configured.
+
+Codex CLI:
 
 ```powershell
 codex mcp add pixel-forge --url http://127.0.0.1:3210/mcp
@@ -232,7 +254,7 @@ Restart your client or refresh its MCP connection after adding the server. Check
 
 Example prompt:
 
-> Use pixel-forge MCP. Read the existing project first. Create a new project named "Dog companion" for a new character, at 32 by 32 pixels. Read the new IDs, then draw a pixel art dog with a transparent background in Idle. Draw in several smaller steps so I can watch in real time. Keep the previous character saved under Projects. Inspect the result with pixel_get_preview when finished.
+> Use pixel-forge MCP. Read the existing project first. Call pixel_create_character with name "Dog companion" and a 32 by 32 pixel canvas. Then draw using its new project ID, intent edit_character, and characterName "Dog companion". Read the new IDs, then draw a pixel art dog with a transparent background in Idle. Draw in several smaller steps so I can watch in real time. Keep the previous character saved under Projects. Inspect the result with pixel_get_preview when finished.
 
 For animation:
 
@@ -336,14 +358,15 @@ For another port, run `$env:PORT="3211"; npm start` and update the MCP endpoint 
 
 ## MCP tools
 
-| Tool                 | Purpose                                                       |
-| -------------------- | ------------------------------------------------------------- |
-| `pixel_get_project`  | Dimensions, palette, frame/layer IDs, selection, and revision |
-| `pixel_get_pixels`   | Exact layer pixels in a region up to 64 × 64                  |
-| `pixel_get_preview`  | PNG preview of the visible layers                             |
-| `pixel_draw`         | Atomic batch of drawing and project changes                   |
-| `pixel_paint_sprite` | Precise sprites from symbol rows and a color map              |
-| `pixel_history`      | Undo/Redo for the shared history                              |
-| `pixel_export`       | PNG image and matching frame metadata                         |
+| Tool                     | Purpose                                                       |
+| ------------------------ | ------------------------------------------------------------- |
+| `pixel_get_project`      | Dimensions, palette, frame/layer IDs, selection, and revision |
+| `pixel_create_character` | Start a suitably named character project in a new tab         |
+| `pixel_get_pixels`       | Exact layer pixels in a region up to 64 × 64                  |
+| `pixel_get_preview`      | PNG preview of the visible layers                             |
+| `pixel_draw`             | Atomic batch of drawing and project changes                   |
+| `pixel_paint_sprite`     | Precise sprites from symbol rows and a color map              |
+| `pixel_history`          | Undo/Redo for the shared history                              |
+| `pixel_export`           | PNG image and matching frame metadata                         |
 
 See [MCP-GUIDE.md](MCP-GUIDE.md) for details and examples.

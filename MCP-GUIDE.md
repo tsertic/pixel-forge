@@ -1,6 +1,20 @@
 # Drawing with Pixel Forge MCP
 
-The user sees your edits live in a shared pixel art editor. Read `pixel_get_project` first. A new character or separate asset must start a **new project** using `new_project`; additional animation groups and edits of the same character stay in its existing project. The previous project is saved automatically and can be reopened under Projects. `pixel_get_preview` returns the composited PNG you can inspect visually.
+The user sees your edits live in a shared pixel art editor. Read `pixel_get_project` first. A new character or separate asset must start a **new project** using `pixel_create_character`; additional animation groups and edits of the same character stay in its existing project. The previous project is saved automatically and can be reopened under Projects. `pixel_get_preview` returns the composited PNG you can inspect visually.
+
+## Example: a wizard after a skeleton
+
+If Skeleton is open and the user asks for a wizard, call **pixel_create_character**:
+
+```json
+{ "name": "Wizard", "width": 32, "height": 32, "expectedProjectId": "SKELETON_PROJECT_ID" }
+```
+
+This always opens a new Wizard project/tab. Then read its IDs and draw with `projectId: "WIZARD_PROJECT_ID"`, `intent: "edit_character"`, and `characterName: "Wizard"`. Do not create a Wizard layer or Wizard Idle animation inside Skeleton. Idle and Run of the **same wizard** belong together in the Wizard project.
+
+Advanced clients may use a `pixel_draw` batch with `intent: "new_character"` and `characterName` matching a single `new_project` operation placed first. A new-character declaration without that operation is rejected rather than drawing in the old project.
+
+**Upgrade:** refresh the MCP tool list or restart the client after updating. Older calls without the required identity fields are rejected. Re-reading a stale tool schema does not create a character project automatically.
 
 ## Default language
 
@@ -10,7 +24,7 @@ English is the default language for the editor, documentation, and MCP instructi
 
 Coordinates are integer pixels with `(0,0)` at top-left. X grows right, Y grows down. Colors are `#RRGGBB`, `#RRGGBBAA` or `null` to erase. All drawing clips at canvas edges. Flood fill applies to a single cel and compares exact colors, including alpha.
 
-Supply `projectId` from the current project for edits. Frame and layer IDs come from `pixel_get_project`. Explicit targets prevent a human's frame/layer selection change from redirecting your drawing. Without explicit targets, operations use the currently active frame/layer at application time. Invalid/locked targets reject the complete batch. Hidden layers can be edited but won't appear in the composite.
+Every `pixel_draw` and `pixel_paint_sprite` call requires `projectId`, `intent`, and `characterName`. For existing-character edits, use `intent: "edit_character"` and that character's project name. If the requested character differs, call `pixel_create_character` first. The server rejects missing declarations, stale project IDs, and mismatched character names. It validates declared identity; it does not recognize characters from pixel content. Supply `projectId` from the current project for edits. Frame and layer IDs come from `pixel_get_project`. Explicit targets prevent a human's frame/layer selection change from redirecting your drawing. Without explicit targets, operations use the currently active frame/layer at application time. Invalid/locked targets reject the complete batch. Hidden layers can be edited but won't appear in the composite.
 
 ## Efficient sprites
 
@@ -19,6 +33,8 @@ Call `pixel_paint_sprite`:
 ```json
 {
   "projectId": "ID_FROM_GET_PROJECT",
+  "intent": "edit_character",
+  "characterName": "Dog",
   "frameId": "FRAME_ID",
   "layerId": "LAYER_ID",
   "x": 3,
@@ -33,11 +49,13 @@ Call `pixel_paint_sprite`:
 
 ## Batch operations
 
-`pixel_draw` accepts `operations`, an optional `projectId`, and a human-readable `label`. A drawing batch is one undo step within its project. Changes validate on a cloned project; failure commits nothing. Commands execute sequentially within the batch. Opening an empty new project creates a tab rather than an undo step. A batch that creates a new project and draws in it can undo the drawing inside that new tab.
+`pixel_draw` accepts `operations`, required `projectId`, `intent`, `characterName`, and a human-readable `label`. A drawing batch is one undo step within its project. Changes validate on a cloned project; failure commits nothing. Commands execute sequentially within the batch. Opening an empty new project creates a tab rather than an undo step. A batch that creates a new project and draws in it can undo the drawing inside that new tab.
 
 ```json
 {
   "projectId": "ID_FROM_GET_PROJECT",
+  "intent": "edit_character",
+  "characterName": "Dog",
   "label": "Sprite silhouette and highlights",
   "operations": [
     { "type": "rect", "x": 6, "y": 8, "width": 12, "height": 10, "color": "#b7956b", "filled": true },
@@ -80,8 +98,8 @@ After structural changes, read `pixel_get_project` again to get new IDs. Selecti
 
 Projects have persistent editor tabs. `new_project` opens a new selected tab while previous characters keep their tabs. Opening a saved project selects its existing tab or adds it once. Closing a tab keeps its artwork in Projects. All browser windows and MCP clients share the selected tab; if the user changes it, read the project again and use its current ID. Each project's Undo/Redo is separate and survives tab navigation during the server session; it resets on server restart.
 
-1. Read the current project and preview. When the request is for a **new character or separate asset**, call `pixel_draw` with `new_project`, a meaningful name, and the desired dimensions. This is the required default for a new character; do not hide the previous character on a layer and reuse its project.
-2. Read `pixel_get_project` again. Use the new project, animation, frame, and layer IDs for further edits. The default group is Idle.
+1. Read the current project and preview. When the request is for a **new character or separate asset**, call `pixel_create_character` with a meaningful `name`, `width`, and `height` (defaults: 32 × 32). You may pass `expectedProjectId` to protect against a concurrent tab change. This is the required default for a new character; do not hide the previous character on a layer and reuse its project.
+2. Read `pixel_get_project` again. Use the new project, animation, frame, and layer IDs for further edits, with `intent: "edit_character"` and the new character name. The default group is Idle.
 3. Draw in several calls and inspect the preview. The previous character stays saved under Projects. For changes to the same character, keep its project.
 
 ## Animation groups
@@ -100,6 +118,8 @@ For a Run animation based on the current Idle poses:
 ```json
 {
   "projectId": "CURRENT_PROJECT_ID",
+  "intent": "edit_character",
+  "characterName": "CURRENT_PROJECT_NAME",
   "label": "Create Run animation from Idle",
   "operations": [
     { "type": "select", "animationId": "IDLE_ANIMATION_ID" },

@@ -13,14 +13,15 @@ async function call(name, args) {
 try {
   await client.connect(new StreamableHTTPClientTransport(new URL(url)));
   const before = JSON.parse((await call('pixel_get_project', {})).content[0].text);
-  // Explicit command-line flag is required before replacing any existing art.
+  // Preserve the existing CLI flag; the demo now opens a separate character project.
   if (!process.argv.includes('--replace')) {
-    console.log('Demo replaces the canvas (undoable). Run: npm run demo -- --replace');
+    console.log('Demo opens a new project tab. Run: npm run demo -- --replace');
   } else {
-    await call('pixel_draw', {
-      projectId: before.id,
-      operations: [{ type: 'new_project', name: 'Forest familiar', width: 32, height: 32 }],
-      label: 'Demo · new 32 × 32 canvas',
+    await call('pixel_create_character', {
+      expectedProjectId: before.id,
+      name: 'Forest familiar',
+      width: 32,
+      height: 32,
     });
     const p = JSON.parse((await call('pixel_get_project', {})).content[0].text),
       colors = {
@@ -105,12 +106,20 @@ try {
       },
     ];
     for (const phase of phases) {
-      await call('pixel_paint_sprite', { projectId: p.id, ...phase, colors });
+      await call('pixel_paint_sprite', {
+        projectId: p.id,
+        intent: 'edit_character',
+        characterName: p.name,
+        ...phase,
+        colors,
+      });
       console.log(phase.label);
       await sleep(650);
     }
     await call('pixel_draw', {
       projectId: p.id,
+      intent: 'edit_character',
+      characterName: p.name,
       operations: [
         {
           type: 'settings',

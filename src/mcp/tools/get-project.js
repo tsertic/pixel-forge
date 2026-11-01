@@ -11,6 +11,8 @@ export function registerTool(register, store) {
       revision: store.revision,
       canUndo: !!store.undoStack.length,
       canRedo: !!store.redoStack.length,
+      drawingPolicy:
+        'One character per project. For a different character call pixel_create_character first (e.g. Wizard while Skeleton is open). Drawing requires intent=edit_character, characterName equal to the actual project/character name, and projectId. Do not add another character as a layer or animation.',
     }),
   );
 }

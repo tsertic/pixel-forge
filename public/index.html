@@ -233,6 +233,17 @@
       <h1>You imagine.<br />AI draws. Live.</h1>
       <p>You and the AI share the same canvas. Every MCP edit appears here instantly and can be undone.</p>
       <div class="endpoint"><span>STREAMABLE HTTP · LOCAL</span><code id="endpoint"></code></div>
+      <label
+        >JSON configuration
+        <button class="copy-command" data-copy="json" aria-label="Copy JSON configuration">
+          Copy JSON
+        </button></label
+      >
+      <pre id="mcpJsonConfig"></pre>
+      <button id="downloadMcpConfig" class="button small">Download JSON ↓</button>
+      <p class="muted">
+        For MCP clients using an mcpServers JSON configuration. Merge this entry with your existing servers.
+      </p>
       <label>Codex <button class="copy-command" data-copy="codex">Copy</button></label>
       <pre id="codexCommand"></pre>
       <label>Claude Code <button class="copy-command" data-copy="claude">Copy</button></label>
@@ -241,8 +252,8 @@
         After adding the server, restart your MCP client or refresh its connection. Keep this editor running.
       </p>
       <div class="prompt-example">
-        “Draw a pixel art dog on the existing canvas. Use pixel-forge MCP and draw in several steps so I can
-        watch.”
+        “Use pixel_create_character to create a new project named Dog. Draw a pixel art dog in its Idle
+        animation using pixel-forge MCP, in several steps so I can watch.”
       </div>
       <p class="muted">The model runs in Codex or Claude Code. The editor does not require an API key.</p>
     </dialog>

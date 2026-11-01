@@ -7,6 +7,7 @@ import { registerTool as registerDraw } from './mcp/tools/draw.js';
 import { registerTool as registerPaintSprite } from './mcp/tools/paint-sprite.js';
 import { registerTool as registerHistory } from './mcp/tools/history.js';
 import { registerTool as registerExport } from './mcp/tools/export.js';
+import { registerTool as registerCreateCharacter } from './mcp/tools/create-character.js';
 
 export function createMcpServer(store, onActivity = () => {}) {
   const server = new McpServer({ name: 'pixel-forge', version: '1.0.0' }, { instructions });
@@ -29,6 +30,7 @@ export function createMcpServer(store, onActivity = () => {}) {
       },
     );
   registerGetProject(register, store);
+  registerCreateCharacter(register, store);
   registerGetPixels(register, store);
   registerGetPreview(register, store);
   registerDraw(register, store);

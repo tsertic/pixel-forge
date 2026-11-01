@@ -1,3 +1,4 @@
+import { callWithCharacter } from './helpers/mcp-client.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync, existsSync, statSync } from 'node:fs';
@@ -263,7 +264,7 @@ test('Unity sync HTTP configuration and real MCP drawing update the exported ass
     assert.equal(response.status, 200);
     assert.equal((await response.json()).error, null);
     await client.connect(new StreamableHTTPClientTransport(new URL(origin + '/mcp')));
-    const result = await client.callTool({
+    const result = await callWithCharacter(client, instance.store, {
       name: 'pixel_draw',
       arguments: { operations: [{ type: 'pixels', pixels: [{ x: 0, y: 0, color: '#123456' }] }] },
     });

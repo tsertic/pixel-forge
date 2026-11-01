@@ -1,3 +1,4 @@
+import { callWithCharacter } from './helpers/mcp-client.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
@@ -21,11 +22,14 @@ test('real MCP HTTP client edits the live SSE canvas, returns images, and shares
     assert.match(new TextDecoder().decode(initial.value), /data:/);
     await client.connect(new StreamableHTTPClientTransport(new URL(url + '/mcp')));
     const list = await client.listTools();
-    assert.equal(list.tools.length, 7);
+    assert.equal(list.tools.length, 8);
     assert.ok(list.tools.some((t) => t.name === 'pixel_paint_sprite'));
-    const result = await client.callTool({ name: 'pixel_get_project', arguments: {} }),
+    const result = await callWithCharacter(client, instance.store, {
+        name: 'pixel_get_project',
+        arguments: {},
+      }),
       project = JSON.parse(result.content[0].text);
-    const edit = await client.callTool({
+    const edit = await callWithCharacter(client, instance.store, {
       name: 'pixel_paint_sprite',
       arguments: {
         projectId: project.id,
@@ -46,12 +50,15 @@ test('real MCP HTTP client edits the live SSE canvas, returns images, and shares
       live += new TextDecoder().decode(event.value);
     }
     assert.match(live, /MCP test sprite/);
-    const preview = await client.callTool({ name: 'pixel_get_preview', arguments: { scale: 4 } });
+    const preview = await callWithCharacter(client, instance.store, {
+      name: 'pixel_get_preview',
+      arguments: { scale: 4 },
+    });
     assert.equal(preview.content[0].type, 'image');
     const png = PNG.sync.read(Buffer.from(preview.content[0].data, 'base64'));
     assert.equal(png.width, 128);
     assert.equal(png.data[3], 0);
-    const invalid = await client.callTool({
+    const invalid = await callWithCharacter(client, instance.store, {
       name: 'pixel_draw',
       arguments: { projectId: 'stale', operations: [{ type: 'clear' }] },
     });
@@ -62,8 +69,14 @@ test('real MCP HTTP client edits the live SSE canvas, returns images, and shares
       body: JSON.stringify({ operations: [{ type: 'line', x1: 0, y1: 0, x2: 3, y2: 0, color: '#112233' }] }),
     });
     assert.equal(uiEdit.status, 200);
-    await client.callTool({ name: 'pixel_history', arguments: { direction: 'undo' } });
-    const pixels = await client.callTool({ name: 'pixel_get_pixels', arguments: { width: 4, height: 1 } });
+    await callWithCharacter(client, instance.store, {
+      name: 'pixel_history',
+      arguments: { direction: 'undo' },
+    });
+    const pixels = await callWithCharacter(client, instance.store, {
+      name: 'pixel_get_pixels',
+      arguments: { width: 4, height: 1 },
+    });
     assert.deepEqual(JSON.parse(pixels.content[0].text).rows[0], [null, null, null, null]);
     const exportResponse = await fetch(url + '/api/export?sheet=true&scale=1');
     assert.equal(exportResponse.headers.get('content-type'), 'image/png');
@@ -80,7 +93,7 @@ test('real MCP HTTP client edits the live SSE canvas, returns images, and shares
     });
     assert.equal(bad.status, 400);
     const idleId = instance.store.project.activeAnimationId;
-    const grouped = await client.callTool({
+    const grouped = await callWithCharacter(client, instance.store, {
       name: 'pixel_draw',
       arguments: {
         operations: [
@@ -92,14 +105,15 @@ test('real MCP HTTP client edits the live SSE canvas, returns images, and shares
     });
     assert.ok(!grouped.isError);
     const groupedProject = JSON.parse(
-      (await client.callTool({ name: 'pixel_get_project', arguments: {} })).content[0].text,
+      (await callWithCharacter(client, instance.store, { name: 'pixel_get_project', arguments: {} }))
+        .content[0].text,
     );
     assert.equal(groupedProject.animations.length, 2);
     assert.equal(
       groupedProject.frames.filter((frame) => frame.animationId === groupedProject.activeAnimationId).length,
       2,
     );
-    const groupExport = await client.callTool({
+    const groupExport = await callWithCharacter(client, instance.store, {
       name: 'pixel_export',
       arguments: { sheet: true, animationId: idleId },
     });
@@ -109,7 +123,7 @@ test('real MCP HTTP client edits the live SSE canvas, returns images, and shares
     assert.match(metadataResponse.headers.get('content-disposition'), /untitled-sprite-idle.json/);
     assert.equal((await metadataResponse.json()).frames.length, 1);
     assert.equal((await fetch(url + '/api/export?projectId=stale')).status, 400);
-    const newCharacter = await client.callTool({
+    const newCharacter = await callWithCharacter(client, instance.store, {
       name: 'pixel_draw',
       arguments: {
         projectId: project.id,

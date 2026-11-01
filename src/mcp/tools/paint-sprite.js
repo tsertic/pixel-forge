@@ -1,11 +1,12 @@
 import { z } from 'zod';
 import { colorSchema } from '../../model.js';
 import { target, expected } from '../schemas.js';
+import { assertCharacterTarget } from '../character-target.js';
 
 export function registerTool(register, store) {
   register(
     'pixel_paint_sprite',
-    'Efficient pixel art: rows of single-character symbols and colors mapping. Dot skips existing pixels. A symbol mapped to null erases. Row 0 is top; x,y position the sprite. Example rows [".aa.","abba"], colors {"a":"#ffffff","b":"#151b2e"}.',
+    'Draw a sprite in the selected character project. Required: projectId, intent="edit_character", and characterName matching the character project. For a NEW character such as Wizard when Skeleton is open, call pixel_create_character first; never add it to the old project. Rows contain single-character symbols with colors mapping; dot skips pixels, null erases. Row 0 is top.',
     {
       ...expected,
       ...target,
@@ -17,6 +18,10 @@ export function registerTool(register, store) {
       label: z.string().min(1).max(100).default('AI sprite'),
     },
     false,
-    (args) => store.apply([{ ...args, type: 'sprite' }], 'MCP', args.label, args.projectId),
+    (args) => {
+      const operations = [{ ...args, type: 'sprite' }];
+      assertCharacterTarget(store, args, operations);
+      return store.apply(operations, 'MCP', args.label, args.projectId);
+    },
   );
 }

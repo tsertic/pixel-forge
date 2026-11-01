@@ -48,3 +48,9 @@ Projects retain their flat `frames` array for IDs, drawing targets, and global p
 Canvas rendering, frame thumbnails, onion skin, and playback filter by active animation. PNG sheets and metadata resolve one animation through `exportSelection()` in `src/png.js`. An explicit group/frame mismatch is rejected. Automatic exports remain single-frame PNGs, with the configured prefix and animation suffix; existing un-suffixed exports are retained. Sidecars identify both project and animation ownership.
 
 `src/project/library.js` stores independent project files in `data/projects/` using hashed IDs as safe filenames. Store saves each project and archives the previous character before switching IDs. A failed archive rejects the switch. The Projects panel lists and opens saved characters, including after restarts. Tests without a data file use an in-memory library.
+
+## MCP character identity
+
+`pixel_create_character` always creates a new project/tab with a suitable name and a default Idle group. The draw and sprite tools require `projectId`, `intent`, and `characterName` from `src/mcp/schemas.js`. `src/mcp/character-target.js` validates declared identity before any transaction runs: edit names must match the current project, and new-character batches must begin with a single matching `new_project`. A rejected call cannot add a Wizard layer or animation to Skeleton by declaring Wizard as an edit. Agents still provide the meaning of their request; the server does not classify characters from bitmap data. Read-only project responses repeat the workflow so cached clients also see it.
+
+`src/project/extract-character.js` copies selected layers/animation groups into validated, independent projects. It preserves pixel arrays and can retain an existing project's ID for the character that remains, while assigning new IDs to extracted characters. Full source backups should be kept before applying a split to user data.
